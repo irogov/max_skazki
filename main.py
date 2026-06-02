@@ -4,8 +4,8 @@ from services.fairytale import send_daily_story
 from openai import AsyncOpenAI
 from aiomax.types import FileAttachment
 
-env = environs.Env()
-env.read_env()
+
+
 MAX_TOKEN = os.environ.get('MAX_TOKEN')
 DEEPSEEK_TOKEN = os.environ.get('DEEPSEEK_TOKEN')
 CHAT_ID = os.environ.get('CHAT_ID')
