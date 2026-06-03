@@ -15,10 +15,10 @@ async def main():
     scheduler = AsyncIOScheduler()
     scheduler.add_job(
         send_daily_story,
-        'interval',
-        minutes=1,
-        # 'cron',
-        # hour=19,
+        # 'interval',
+        # minutes=1,
+        'cron',
+        hour=19,
         args=[bot, CHAT_ID, client],  # Передаем экземпляр бота в функцию
         timezone="Europe/Moscow",
     )
