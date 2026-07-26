@@ -54,7 +54,7 @@ async def get_story(group: int, client: AsyncOpenAI):
             {"role": "user", "content": query}
         ]
     response = await client.chat.completions.create(
-        model="deepseek-chat",
+        model="deepseek-v4-pro",
         messages=messages,
         max_tokens=8000,
         temperature=0.7
