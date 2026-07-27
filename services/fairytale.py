@@ -54,7 +54,7 @@ async def get_story(group: int, client: AsyncOpenAI):
             {"role": "user", "content": query}
         ]
     response = await client.chat.completions.create(
-        model="deepseek-v4-pro",
+        model="deepseek-v4-flash",
         messages=messages,
         max_tokens=8000,
         temperature=0.7
@@ -107,25 +107,35 @@ def ultra_clean(text: str) -> str:
             result.append(char)
     return ''.join(result).strip()
 
+async def _send_with_retry(bot, chat_id, text, retries=3, delay=5):
+    for attempt in range(retries):
+        try:
+            await bot.send_message(chat_id=chat_id, text=text)
+            return True
+        except Exception as e:
+            print(f"Ошибка отправки (попытка {attempt + 1}/{retries}): {e}")
+            await asyncio.sleep(delay)
+    return False
+
+
 async def send_daily_story(bot, channel_id, client):
     random_group = random.choice([1, 2, 3])
     to_sleep = 1
     tale, group = await get_story(random_group, client)
     tale_normalized = ultra_clean(tale)
     tales = prepare_book(tale_normalized)
-    channel = channel_id
-    
+
     try:
         await send_fairy_picture(channel_id, bot=bot)
         await asyncio.sleep(to_sleep)
     except Exception as e:
         print(e)
-        
-    for text in tales.values():
-        try:
-            await bot.send_message(chat_id=channel, text=text)
-            await asyncio.sleep(to_sleep)
-        except Exception as e:
-            return False
 
-    return True
+    all_ok = True
+    for text in tales.values():
+        ok = await _send_with_retry(bot, channel_id, text)
+        if not ok:
+            all_ok = False  # часть не отправилась, но продолжаем со следующей
+        await asyncio.sleep(to_sleep)
+
+    return all_ok
